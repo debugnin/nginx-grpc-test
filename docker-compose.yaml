@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  grpc-server:
+    build: ./server
+    container_name: grpc_server
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "50051:50051"
+    networks:
+      - grpc_network
+
+  nginx:
+    image: nginx:latest
+    container_name: grpc_nginx
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:8080"
+    depends_on:
+      - grpc-server
+    networks:
+      - grpc_network
+
+  grpc-client:
+    build: ./client
+    container_name: grpc_client
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      - nginx
+    networks:
+      - grpc_network
+
+networks:
+  grpc_network:
+    driver: bridge
